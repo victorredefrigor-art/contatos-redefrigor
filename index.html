@@ -15,7 +15,13 @@
         color: #00325e;
     }
     header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
         margin-bottom: 10px;
+    }
+    header img {
+        height: 55px;
     }
     h1 {
         color: var(--azul);
@@ -193,8 +199,11 @@
 <!-- CONTEÚDO PROTEGIDO -->
 <div id="content" style="display:none;">
     <header>
-        <h1>Lista de Contatos</h1>
-        <div class="date">Atualizado em 27/11/2025</div>
+        <img src="logo_redefrigor.png" alt="Logo REDEFRIGOR">
+        <div>
+            <h1>Lista de Contatos</h1>
+            <div class="date">Atualizado em 27/11/2025</div>
+        </div>
     </header>
 
     <div class="filters">
