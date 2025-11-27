@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Lista de Contatos — REDEFRIGOR</title>
+<style>
+    :root {
+        --azul: #0056A4;
+        --verde: #00A428;
+    }
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f8f8f8;
+        color: #00325e;
+    }
+    header {
+        margin-bottom: 10px;
+    }
+    h1 {
+        color: var(--azul);
+        font-size: 1.9rem;
+        margin: 0 0 5px 0;
+    }
+    .date {
+        font-size: .9rem;
+        margin-bottom: 15px;
+        color: #666;
+    }
+
+    /* ==== TELA DE LOGIN ==== */
+    #login {
+        max-width: 380px;
+        margin: 60px auto;
+        background: #ffffff;
+        padding: 20px 22px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        border-top: 4px solid var(--azul);
+    }
+    #login h2 {
+        margin: 0 0 10px 0;
+        color: var(--azul);
+    }
+    #login p {
+        margin: 0 0 15px 0;
+        font-size: 0.9rem;
+        color: #555;
+    }
+    #login input {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+    }
+    #login button {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 4px;
+        border: none;
+        background: var(--azul);
+        color: #fff;
+        font-weight: bold;
+        font-size: 0.95rem;
+        cursor: pointer;
+    }
+    #login button:hover {
+        background: #00447f;
+    }
+    #loginError {
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: #b00020;
+        display: none;
+    }
+
+    /* ==== CONTEÚDO PRINCIPAL ==== */
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 20px;
+        align-items: center;
+        margin-bottom: 20px;
+        background: #ffffff;
+        padding: 10px 15px;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .filters label {
+        font-size: .9rem;
+        font-weight: bold;
+        color: #333;
+    }
+    .filters input,
+    .filters select {
+        padding: 6px 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: .9rem;
+    }
+    .group {
+        margin-bottom: 30px;
+        background-color: #ffffff;
+        padding: 18px 22px;
+        border-radius: 10px;
+        border-left: 6px solid var(--azul);
+        box-shadow: 0px 2px 6px rgba(0,0,0,0.07);
+        page-break-inside: avoid;
+    }
+    .group-title {
+        font-size: 1.35rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: var(--azul);
+        border-bottom: 2px solid var(--verde);
+        padding-bottom: 6px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th {
+        background-color: var(--verde);
+        color: white;
+    }
+    th, td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #dcdcdc;
+        font-size: .95rem;
+    }
+    /* Colunas */
+    th:nth-child(2),
+    td:nth-child(2) {
+        text-align: right;
+        width: 180px;
+        white-space: nowrap;
+    }
+    th:nth-child(3),
+    td:nth-child(3) {
+        text-align: center;
+        width: 120px;
+        white-space: nowrap;
+    }
+    td:nth-child(1) {
+        text-align: left;
+    }
+    a {
+        color: var(--azul);
+        text-decoration: none;
+        font-weight: bold;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+    .wa-btn {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #25D366;
+        color: #fff !important;
+        font-weight: bold;
+        font-size: 0.8rem;
+        text-decoration: none !important;
+        border: none;
+    }
+    .wa-btn::before {
+        content: "🟢 ";
+    }
+    .wa-btn:hover {
+        opacity: 0.9;
+    }
+    @media print {
+        body { background: #fff; }
+        #login { display: none; }
+        .filters { display: none; }
+        .group { box-shadow: none; border-left-color: #000; }
+    }
+</style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div id="login">
+    <h2>Acesso restrito</h2>
+    <p>Digite a senha para visualizar a lista de contatos.</p>
+    <input type="password" id="passwordInput" placeholder="Senha">
+    <button id="loginBtn">Entrar</button>
+    <div id="loginError">Senha incorreta. Tente novamente.</div>
+</div>
+
+<!-- CONTEÚDO PROTEGIDO -->
+<div id="content" style="display:none;">
+    <header>
+        <h1>Lista de Contatos</h1>
+        <div class="date">Atualizado em 27/11/2025</div>
+    </header>
+
+    <div class="filters">
+        <div>
+            <label for="searchInput">Buscar por nome:</label><br>
+            <input id="searchInput" type="text" placeholder="Digite parte do nome...">
+        </div>
+        <div>
+            <label for="groupFilter">Filtrar por grupo:</label><br>
+            <select id="groupFilter">
+                <option value="todos">Todos os grupos</option>
+                <option value="Festval">Festval</option>
+                <option value="C-vale">C-vale</option>
+                <option value="Irani">Irani</option>
+                <option value="Muffato">Muffato</option>
+                <option value="Dalpozzo">Dalpozzo</option>
+                <option value="Allmayer">Allmayer</option>
+                <option value="Consalter">Consalter</option>
+                <option value="Super Dia">Super Dia</option>
+                <option value="Gebon">Gebon</option>
+                <option value="Riviera">Riviera</option>
+                <option value="Dasa">Dasa</option>
+                <option value="Puppo">Puppo</option>
+                <option value="Arroyo">Arroyo</option>
+                <option value="Geriba">Geriba</option>
+                <option value="Gela Boca">Gela Boca</option>
+                <option value="Alfama">Alfama</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ================= FESTVAL ================= -->
+    <div class='group' data-group="Festval">
+      <div class='group-title'>Festval</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Allan Subgerente Festval Centro</td><td><a href="tel:+554599772121">(45) 99772-2121</a></td></tr>
+        <tr><td>Amauri Gerente Festval Regional</td><td><a href="tel:+554599278297">(45) 99278-8297</a></td></tr>
+        <tr><td>Ana Gerente Festval Faculdade</td><td><a href="tel:+554599915553">(45) 99915-5553</a></td></tr>
+        <tr><td>Anderson Gerente Festval Carlos Gomes</td><td><a href="tel:+554591088814">(45) 91088-8814</a></td></tr>
+        <tr><td>Daniel Manutenção Festval</td><td><a href="tel:+554591150584">(45) 91150-5584</a></td></tr>
+        <tr><td>Lauro Sub Gerente Festval Centro</td><td><a href="tel:+554591123381">(45) 91123-3381</a></td></tr>
+        <tr><td>Marcia Festval Tancredo Neves</td><td><a href="tel:+554598503463">(45) 98503-3463</a></td></tr>
+        <tr><td>Messias Gerente Festval Erechim</td><td><a href="tel:+554599791864">(45) 99791-1864</a></td></tr>
+        <tr><td>Michelle Subgerente Festval Erechim</td><td><a href="tel:+554599475753">(45) 99475-5753</a></td></tr>
+        <tr><td>Suellen Gerente Festval Tancredo Neves</td><td><a href="tel:+554599698925">(45) 99698-8925</a></td></tr>
+        <tr><td>Thiago Gerente Festval Carlos Gomes</td><td><a href="tel:+554197110056">(41) 97110-0056</a></td></tr>
+        <tr><td>Vanuza Gerente Festval Centro</td><td><a href="tel:+554599278287">(45) 99278-8287</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= C-VALE ================= -->
+    <div class='group' data-group="C-vale">
+      <div class='group-title'>C-vale</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Alcione Manutenção CD C-vale</td><td><a href="tel:+554497040988">(44) 97040-0988</a></td></tr>
+        <tr><td>Ana Cláudia Gerente C-vale Assis Chateaubriand Loja Antiga</td><td><a href="tel:+554484342783">(44) 84342-2783</a></td></tr>
+        <tr><td>Angela Gerente C-vale Terra Roxa</td><td><a href="tel:+554499332365">(44) 99332-2365</a></td></tr>
+        <tr><td>Eliezer Gerente C-vale Naviraí</td><td><a href="tel:+556781486002">(67) 81486-0002</a></td></tr>
+        <tr><td>Giovani Gerente C-vale Assis Chateaubriand</td><td><a href="tel:+554499093001">(44) 99093-3001</a></td></tr>
+        <tr><td>João C-vale Rio Brilhante</td><td><a href="tel:+556799491550">(67) 99491-1550</a></td></tr>
+        <tr><td>Joares Frente C-vale Terra Roxa</td><td><a href="tel:+554498237327">(44) 98237-3327</a></td></tr>
+        <tr><td>Kaiser C-Vale Assis Chateaubriand</td><td><a href="tel:+554499611424">(44) 99611-1424</a></td></tr>
+        <tr><td>Marcos C-vale Caarapó</td><td><a href="tel:+556799339504">(67) 99339-9504</a></td></tr>
+        <tr><td>Rosana Gerente C-vale Maripá</td><td><a href="tel:+554498637500">(44) 98637-5000</a></td></tr>
+        <tr><td>Sanches Gerente C-vale Palotina</td><td><a href="tel:+554498503739">(44) 98503-7739</a></td></tr>
+        <tr><td>Sandra Subgerente C-vale Maripá</td><td><a href="tel:+554499359921">(44) 99359-9921</a></td></tr>
+        <tr><td>Valber Subgerente C-vale Palotina</td><td><a href="tel:+554498542863">(44) 98542-8863</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= IRANI ================= -->
+    <div class='group' data-group="Irani">
+      <div class='group-title'>Irani</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Carlos Gerente Irani Parque Verde</td><td><a href="tel:+554599381842">(45) 99381-1842</a></td></tr>
+        <tr><td>Eliane Irani Tancredo</td><td><a href="tel:+554599835273">(45) 99835-5273</a></td></tr>
+        <tr><td>José Subgerente Irani Matriz</td><td><a href="tel:+554598288418">(45) 98288-8418</a></td></tr>
+        <tr><td>Kelly Manutenção Grupo Irani</td><td></td></tr>
+        <tr><td>Matheus Gerente Irani Floresta</td><td><a href="tel:+554599946892">(45) 99946-8892</a></td></tr>
+        <tr><td>Dario Gerente Porti Cascavel</td><td><a href="tel:+554599740251">(45) 99740-0251</a></td></tr>
+        <tr><td>Prevenção Porti Foz</td><td><a href="tel:+554599052494">(45) 99052-5494</a></td></tr>
+        <tr><td>Rafael Gerente Irani Parque Verde</td><td><a href="tel:+554599640661">(45) 99640-0661</a></td></tr>
+        <tr><td>Reni Subgerente Porti Cascavel</td><td><a href="tel:+554599062427">(45) 99062-5427</a></td></tr>
+        <tr><td>Rosangela Subgerente Irani Parque Verde</td><td><a href="tel:+554599836532">(45) 99836-6532</a></td></tr>
+        <tr><td>Vanderson Subgerente Irani Matriz</td><td><a href="tel:+554588076377">(45) 88076-3777</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= MUFFATO ================= -->
+    <div class='group' data-group="Muffato">
+      <div class='group-title'>Muffato</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Gerente Muffato Max Safira Foz</td><td><a href="tel:+554598402266">(45) 98402-2266</a></td></tr>
+        <tr><td>Leandro Gerente Muffato JK</td><td><a href="tel:+554599609067">(45) 99609-0067</a></td></tr>
+        <tr><td>Rubens Gerente Muffato Cataratas</td><td><a href="tel:+554591497627">(45) 91497-7627</a></td></tr>
+        <tr><td>Vilma Subgerente Muffato Cataratas</td><td><a href="tel:+554599741482">(45) 99741-4482</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= DALPOZZO ================= -->
+    <div class='group' data-group="Dalpozzo">
+      <div class='group-title'>Dalpozzo</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Elson Gerente Dalpozzo Home Center</td><td><a href="tel:+554291492890">(42) 91492-8890</a></td></tr>
+        <tr><td>Joel Gerente Dalpozzo Shopping</td><td><a href="tel:+554291140309">(42) 91140-0309</a></td></tr>
+        <tr><td>Paulo Gerente Dalpozzo Home Center</td><td><a href="tel:+554291378334">(42) 91378-8334</a></td></tr>
+        <tr><td>Sandro Gerente Dalpozzo Filial</td><td><a href="tel:+554291444525">(42) 91444-4525</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= ALLMAYER ================= -->
+    <div class='group' data-group="Allmayer">
+      <div class='group-title'>Allmayer</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Adriano Gerente Allmayer Marechal</td><td><a href="tel:+554588186521">(45) 88186-6521</a></td></tr>
+        <tr><td>André Gerente Allmayer Toledo - Industrial</td><td><a href="tel:+554588224355">(45) 88224-3355</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= CONSALTER ================= -->
+    <div class='group' data-group="Consalter">
+      <div class='group-title'>Consalter</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Fábio Gerente Consalter</td><td><a href="tel:+554591459669">(45) 91459-9669</a></td></tr>
+        <tr><td>Maycon Subgerente Consalter</td><td><a href="tel:+554599382838">(45) 99382-8838</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= SUPER DIA ================= -->
+    <div class='group' data-group="Super Dia">
+      <div class='group-title'>Super Dia</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Ana Maria Super Dia</td><td><a href="tel:+554699198765">(46) 99198-8765</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= GEBON ================= -->
+    <div class='group' data-group="Gebon">
+      <div class='group-title'>Gebon</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>David Gebon Japurá</td><td><a href="tel:+554498870829">(44) 98870-8829</a></td></tr>
+        <tr><td>Everton Guedes Manutenção Gebon</td><td><a href="tel:+554499290587">(44) 99290-0587</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= RIVIERA ================= -->
+    <div class='group' data-group="Riviera">
+      <div class='group-title'>Riviera</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Leonardo Gerente Riviera</td><td><a href="tel:+5511988045284">(11) 98804-5284</a></td></tr>
+        <tr><td>Rose Domingues Subgerente Riviera</td><td><a href="tel:+554599209227">(45) 99209-2227</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= DASA ================= -->
+    <div class='group' data-group="Dasa">
+      <div class='group-title'>Dasa</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Marco Manutenção Dasa</td><td><a href="tel:+554588372436">(45) 88372-4436</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= PUPPO ================= -->
+    <div class='group' data-group="Puppo">
+      <div class='group-title'>Puppo</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Paulo Henrique - Gerencia Puppo Cafelandia</td><td><a href="tel:+554598253200">(45) 98253-3200</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= ARROYO ================= -->
+    <div class='group' data-group="Arroyo">
+      <div class='group-title'>Arroyo</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Antônio Atacado Arroyo</td><td><a href="tel:+556796390623">(67) 96390-0623</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= GERIBA ================= -->
+    <div class='group' data-group="Geriba">
+      <div class='group-title'>Geriba</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Celso Geriba</td><td><a href="tel:+554599128051">(45) 99128-8051</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= GELA BOCA ================= -->
+    <div class='group' data-group="Gela Boca">
+      <div class='group-title'>Gela Boca</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Alex Gela Boca</td><td><a href="tel:+554491289445">(44) 91289-9445</a></td></tr>
+      </table>
+    </div>
+
+    <!-- ================= ALFAMA ================= -->
+    <div class='group' data-group="Alfama">
+      <div class='group-title'>Alfama</div>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>WhatsApp</th></tr>
+        <tr><td>Daniel Alfama</td><td><a href="tel:+554598100337">(45) 98100-0337</a></td></tr>
+      </table>
+    </div>
+</div> <!-- fim #content -->
+
+<script>
+// ======== SENHA (proteção básica no front-end) ========
+const PASSWORD = 'Frigor!2025';
+const loginDiv = document.getElementById('login');
+const contentDiv = document.getElementById('content');
+const passInput = document.getElementById('passwordInput');
+const loginBtn = document.getElementById('loginBtn');
+const loginError = document.getElementById('loginError');
+
+function tentarLogin() {
+    const valor = passInput.value || '';
+    if (valor === PASSWORD) {
+        loginDiv.style.display = 'none';
+        contentDiv.style.display = 'block';
+        loginError.style.display = 'none';
+        passInput.value = '';
+    } else {
+        loginError.style.display = 'block';
+        passInput.value = '';
+        passInput.focus();
+    }
+}
+
+loginBtn.addEventListener('click', tentarLogin);
+passInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        tentarLogin();
+    }
+});
+
+// ======== Botão WhatsApp ========
+document.querySelectorAll('.group table').forEach(table => {
+  const rows = table.querySelectorAll('tr');
+  rows.forEach((row, index) => {
+    if (index === 0) return; // cabeçalho
+    let phoneCell = row.querySelector('td:nth-child(2)');
+    let waCell = document.createElement('td');
+
+    if (phoneCell) {
+      const link = phoneCell.querySelector('a');
+      if (link) {
+        const telHref = link.getAttribute('href'); // ex: tel:+554599772121
+        const digits = telHref ? telHref.replace(/\D/g,'') : '';
+        if (digits) {
+          const waLink = document.createElement('a');
+          waLink.href = 'https://wa.me/' + digits;
+          waLink.target = '_blank';
+          waLink.rel = 'noopener';
+          waLink.className = 'wa-btn';
+          waLink.textContent = 'WhatsApp';
+          waCell.appendChild(waLink);
+        }
+      }
+    }
+    row.appendChild(waCell);
+  });
+});
+
+// ======== Filtros (nome + grupo) ========
+const searchInput = document.getElementById('searchInput');
+const groupFilter = document.getElementById('groupFilter');
+
+function aplicarFiltro() {
+  const termo = (searchInput.value || '').toLowerCase();
+  const grupoSelecionado = groupFilter.value;
+
+  document.querySelectorAll('.group').forEach(group => {
+    const groupName = group.getAttribute('data-group');
+    const table = group.querySelector('table');
+    const rows = table.querySelectorAll('tr');
+    let algumVisivel = false;
+
+    rows.forEach((row, index) => {
+      if (index === 0) return; // cabeçalho
+
+      const nome = (row.querySelector('td:nth-child(1)')?.textContent || '').toLowerCase();
+
+      // filtro grupo
+      if (grupoSelecionado !== 'todos' && groupName !== grupoSelecionado) {
+        row.style.display = 'none';
+        return;
+      }
+
+      // filtro nome
+      if (!termo || nome.includes(termo)) {
+        row.style.display = '';
+        algumVisivel = true;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    // esconde grupo se não tiver nenhuma linha visível
+    if (grupoSelecionado !== 'todos' && groupName !== grupoSelecionado) {
+      group.style.display = 'none';
+    } else {
+      group.style.display = algumVisivel ? '' : 'none';
+    }
+  });
+}
+
+if (searchInput && groupFilter) {
+  searchInput.addEventListener('input', aplicarFiltro);
+  groupFilter.addEventListener('change', aplicarFiltro);
+}
+</script>
+
+</body>
+</html>
